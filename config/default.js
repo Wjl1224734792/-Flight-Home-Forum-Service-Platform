@@ -3,7 +3,7 @@ const config = {
     database: {
         HOST: 'localhost',
         USER: 'root',
-        PASSWORD: 'wujl1124',
+        PASSWORD: '123456',
         WALL: 'wall'
     }
 }
