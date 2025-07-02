@@ -1,0 +1,107 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+// 引入 Express 应用实例
+const app = require('../app');
+
+// 引入 debug 模块，用于调试日志输出，命名空间为 'serve:server'
+const debug = require('debug')('serve:server');
+
+// 引入 Node.js 内置的 http 模块，用于创建 HTTP 服务器
+const http = require('http');
+
+// 引入配置文件，包含项目的一些配置信息（例如端口、数据库连接等）
+const config = require('../config/default.js')
+
+/**
+ * 获取端口号并设置到 Express 中
+ * 优先使用配置文件中的 port，如果没有则使用默认值 '3000'
+ */
+const port = normalizePort(config.PORT || '3000');
+app.set('port', port);
+
+/**
+ * 创建 HTTP 服务器
+ * 使用 Express 应用作为请求处理器
+ */
+var server = http.createServer(app);
+
+/**
+ * 监听指定端口，并绑定所有网络接口
+ */
+server.listen(port, () => {
+  console.log("启动了服务器")
+});
+
+// 绑定错误事件监听器
+server.on('error', onError);
+
+// 绑定监听事件监听器，当服务器成功启动后执行
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ * 将传入的端口号转换为合适的格式
+ * - 如果是数字字符串，则解析为整数
+ * - 如果是合法的端口号（大于等于 0），返回该端口号
+ * - 否则返回 false
+ */
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // 如果不是数字，则视为命名管道（named pipe）
+    return val;
+  }
+
+  if (port >= 0) {
+    // 如果是合法端口号，返回该数字
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * HTTP 服务器错误事件监听器
+ * 处理服务器启动时发生的错误
+ */
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * HTTP 服务器监听事件监听器
+ * 当服务器成功启动并开始监听时执行
+ */
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+
+  // 使用 debug 打印日志提示正在监听的端口或管道
+  debug('Listening on ' + bind);
+}
